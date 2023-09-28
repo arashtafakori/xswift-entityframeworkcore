@@ -28,19 +28,19 @@ namespace EntityFrameworkCore.XSwift.Datastore
 
         public async Task CreateAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
-            where TRequest : BaseCommandRequest<TEntity>
+            where TRequest : RequestToCreate<TEntity>
             where TEntity : BaseEntity<TEntity>
         {
             await CheckInvariantsAsync<TRequest, TEntity>(request);
 
             var _dbSet = _dbContext.Set<TEntity>();
 
-            if (entity.GetConditionOfBeingUnique() != null)
+            if (entity.Uniqueness() != null)
             {
                 await new LogicalState()
                     .AddAnPreventer( new PreventIfTheEntityWithTheseConditionsOfExistenceHasAlreadyBeenExisted<TEntity>(
-                        _dbContext, entity.GetConditionOfBeingUnique()!)
-                    .WithDescription(entity.GetDescriptionOfConditionOfBeingUnique()!))
+                        _dbContext, entity.Uniqueness()!.Condition)
+                    .WithDescription(entity.Uniqueness()!.Description!))
                     .CheckAsync();
             }
 
@@ -49,29 +49,29 @@ namespace EntityFrameworkCore.XSwift.Datastore
 
         public async Task UpdateAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
-            where TRequest : BaseCommandRequest<TEntity>
+            where TRequest : RequestToUpdate<TEntity>
             where TEntity : BaseEntity<TEntity>
         {
             await CheckInvariantsAsync<TRequest, TEntity>(request);
 
-            if (entity.GetConditionOfBeingUnique() != null)
+            if (entity.Uniqueness() != null)
             {
                 var builder = new ExpressionBuilder<TEntity>();
-                builder.And(builder.Invert(request.Condition()!));
-                builder.And(entity.GetConditionOfBeingUnique()!);
+                builder.And(builder.Invert(request.Identification()!));
+                builder.And(entity.Uniqueness()!.Condition!);
                 var expression = builder.GetExpression();
                 if (expression != null)
                     await new LogicalState()
                         .AddAnPreventer(new PreventIfTheEntityWithTheseConditionsOfExistenceHasAlreadyBeenExisted
                         <TEntity>(_dbContext, expression)
-                        .WithDescription(entity.GetDescriptionOfConditionOfBeingUnique()!))
+                        .WithDescription(entity.Uniqueness()!.Description!))
                         .CheckAsync();
             }
         }
 
         public async Task ArchiveAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
-            where TRequest : BaseCommandRequest<TEntity>
+            where TRequest : RequestToArchive<TEntity>
             where TEntity : BaseEntity<TEntity>
         {
             await CheckInvariantsAsync<TRequest, TEntity>(request);
@@ -82,23 +82,23 @@ namespace EntityFrameworkCore.XSwift.Datastore
 
         public async Task RestoreAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
-            where TRequest : BaseCommandRequest<TEntity>
+            where TRequest : RequestToRestore<TEntity>
             where TEntity : BaseEntity<TEntity>
         {
             await CheckInvariantsAsync<TRequest, TEntity>(request);
 
-            if (entity.GetConditionOfBeingUnique() != null)
+            if (entity.Uniqueness() != null)
             {
                 var builder = new ExpressionBuilder<TEntity>();
-                builder.And(builder.Invert(request.Condition()!));
-                builder.And(entity.GetConditionOfBeingUnique()!);
+                builder.And(builder.Invert(request.Identification()!));
+                builder.And(entity.Uniqueness()!.Condition!);
                 var expression = builder.GetExpression();
                 if (expression != null)
                     await new LogicalState()
                     .AddAnPreventer(
                         new PreventIfTheEntityWithTheseConditionsOfExistenceHasAlreadyBeenExisted
                         <TEntity>(_dbContext, expression)
-                        .WithDescription(entity.GetDescriptionOfConditionOfBeingUnique()!))
+                        .WithDescription(entity.Uniqueness()!.Description!))
                     .CheckAsync();
             }
 
@@ -108,7 +108,7 @@ namespace EntityFrameworkCore.XSwift.Datastore
 
         public async Task DeleteAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
-            where TRequest : BaseCommandRequest<TEntity>
+            where TRequest : RequestToDelete<TEntity>
             where TEntity : BaseEntity<TEntity>
         {
             await CheckInvariantsAsync<TRequest, TEntity>(request);
@@ -139,7 +139,7 @@ namespace EntityFrameworkCore.XSwift.Datastore
             await CheckInvariantsAsync<TRequest, TEntity>(request);
 
             return await _dbContext.Set<TEntity>().AsQueryable().AnyAsync(
-                condition: request.Condition(),
+                condition: request.Identification(),
                 evenArchivedData: request.EvenArchivedData,
                 offset: request.PageNumber,
                 limit: request.PageSize);
@@ -373,7 +373,7 @@ namespace EntityFrameworkCore.XSwift.Datastore
             where TSource : class
         {
             return _dbContext.Set<TSource>().AsQueryable().MakeQuery(
-                condition: request.Condition(),
+                condition: request.Identification(),
                 orderBy: request.OrderBy(),
                 orderByDescending: request.OrderByDescending(),
                 include: request.Include(),

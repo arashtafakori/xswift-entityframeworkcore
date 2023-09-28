@@ -1,1 +1,1 @@
-# xswift
+This package provides Implementations of the datasource abstraction that belongs to the XSwift frameworks. The implementations are based on the Entity framework core.
