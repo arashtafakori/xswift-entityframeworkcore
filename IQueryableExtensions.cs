@@ -3,27 +3,11 @@ using System.Linq.Expressions;
 
 namespace EntityFrameworkCore.XSwift.Datastore
 {
-    public static class IQueryableExtensions
+    internal static class IQueryableExtensions
     {
-        public static async Task<bool> AnyAsync<TSource>(
+        internal static IQueryable<TSource> MakeQuery<TSource>(
             this IQueryable<TSource> query,
-            Expression<Func<TSource, bool>>? condition,
-            bool evenArchivedData = false,
-            int? offset = null,
-            int? limit = null)
-            where TSource : class
-        {
-            return await MakeQuery(
-                query: query,
-                condition: condition,
-                evenArchivedData: evenArchivedData)
-                .SkipQuery(offset: offset, limit: limit)
-                .AnyAsync();
-        }
-
-        public static IQueryable<TSource> MakeQuery<TSource>(
-            this IQueryable<TSource> query,
-            Expression<Func<TSource, bool>>? condition = null,
+            Expression<Func<TSource, bool>>? where = null,
             Expression<Func<TSource, object>>? orderBy = null,
             Expression<Func<TSource, object>>? orderByDescending = null,
             Expression<Func<TSource, object>>? include = null,
@@ -37,11 +21,11 @@ namespace EntityFrameworkCore.XSwift.Datastore
             if ((bool)evenArchivedData!)
                 query = query.IgnoreQueryFilters();
 
-            if (condition != null)
-                query = query.Where(condition);
+            if (where != null)
+                query = query.Where(where);
 
             if (orderBy != null)
-                query = query.OrderByDescending(orderBy);
+                query = query.OrderBy(orderBy);
 
             if (orderByDescending != null)
                 query = query.OrderByDescending(orderByDescending);
@@ -51,7 +35,7 @@ namespace EntityFrameworkCore.XSwift.Datastore
 
             return query;
         }
-        public static IQueryable<TSource> SkipQuery<TSource>(
+        internal static IQueryable<TSource> SkipQuery<TSource>(
             this IQueryable<TSource> query,
             int? offset = null,
             int? limit = null)

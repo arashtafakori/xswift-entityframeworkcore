@@ -5,14 +5,14 @@ using System.Linq.Expressions;
 
 namespace EntityFrameworkCore.XSwift.Datastore
 {
-    public class PreventIfTheEntityWithTheseConditionsOfExistenceHasAlreadyBeenExisted<TEntity>
+    public class PreventIfTheEntityWithTheseUniquenessConditionsHasAlreadyBeenExisted<TEntity>
         : LogicalPreventer
         where TEntity : BaseEntity<TEntity>
     {
         private DbContext _context;
         private Expression<Func<TEntity, bool>> _condition;
  
-        public PreventIfTheEntityWithTheseConditionsOfExistenceHasAlreadyBeenExisted(
+        public PreventIfTheEntityWithTheseUniquenessConditionsHasAlreadyBeenExisted(
             DbContext context, Expression<Func<TEntity, bool>> condition)
         {
             _context = context;
@@ -21,14 +21,16 @@ namespace EntityFrameworkCore.XSwift.Datastore
 
         public override async Task<bool> ResolveAsync()
         {
-            return await _context.Set<TEntity>().AsQueryable().AnyAsync(
-                condition: _condition);
+            return await _context.Set<TEntity>()
+                .AsQueryable()
+                .Where(_condition)
+                .AnyAsync();
         }
 
         public override IIssue? GetIssue()
         {
-            return new AnEntityWithTheseConditionsOfExistenceHasAlreadyBeenExisted(
-                    typeof(TEntity).Name);
+            return new AnEntityWithTheseUniquenessConditionsHasAlreadyBeenExisted(
+                    typeof(TEntity).Name, Description);
         }
     }
 }

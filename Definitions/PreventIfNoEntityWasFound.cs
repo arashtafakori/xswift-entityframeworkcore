@@ -23,7 +23,7 @@ namespace EntityFrameworkCore.XSwift.Datastore
 
         public override IIssue? GetIssue()
         {
-            return new NoEntityWasFound(typeof(TEntity).Name);
+            return new NoEntityWasFound(typeof(TEntity).Name, Description);
         }
     }
 }
