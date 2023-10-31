@@ -4,8 +4,9 @@ using XSwift.Domain;
 using Microsoft.EntityFrameworkCore;
 using SoftDeleteServices.Concrete;
 using SoftDeleteServices.Configuration;
+using EntityFrameworkCore.XSwift.Datastore;
 
-namespace EntityFrameworkCore.XSwift.Datastore
+namespace EntityFrameworkCore.XSwift
 {
     public abstract class Database : IDatabase
     {

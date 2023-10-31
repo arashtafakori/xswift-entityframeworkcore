@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace EntityFrameworkCore.XSwift.Datastore
+namespace EntityFrameworkCore.XSwift
 {
     internal static class IQueryableExtensions
     {

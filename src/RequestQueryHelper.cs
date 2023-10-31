@@ -1,7 +1,7 @@
 ﻿using XSwift.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace EntityFrameworkCore.XSwift.Datastore
+namespace EntityFrameworkCore.XSwift
 {
     public class RequestQueryHelper
     {

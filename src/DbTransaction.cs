@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace EntityFrameworkCore.XSwift.Datastore
+namespace EntityFrameworkCore.XSwift
 {
     public abstract class DbTransaction : IDbTransaction
     {

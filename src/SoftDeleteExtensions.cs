@@ -4,7 +4,7 @@ using SoftDeleteServices.Configuration;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace EntityFrameworkCore.XSwift.Datastore
+namespace EntityFrameworkCore.XSwift
 {
     public static class SoftDeleteExtensions
     {
