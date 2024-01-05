@@ -4,29 +4,56 @@ using XSwift.Domain;
 using Microsoft.EntityFrameworkCore;
 using SoftDeleteServices.Concrete;
 using SoftDeleteServices.Configuration;
-using EntityFrameworkCore.XSwift.Datastore;
+using XSwift.EntityFrameworkCore.Datastore;
 
-namespace EntityFrameworkCore.XSwift
+namespace XSwift.EntityFrameworkCore
 {
+    /// <summary>
+    /// Provides a base class for the database with common functionality.
+    /// </summary>
     public abstract class Database : IDatabase
     {
         private readonly DbContext _dbContext;
 
+        /// <summary>
+        /// Initializes a new instance of the Database class.
+        /// </summary>
+        /// <param name="context">The DbContext associated with the database.</param>
         public Database(DbContext context)
         {
             _dbContext = context;
         }
-  
+
+        /// <summary>
+        /// Gets or sets the configuration for soft delete fantionality.
+        /// </summary>
+
         public CascadeSoftDeleteConfiguration<ISoftDelete>? _softDeleteConfiguration;
 
+        /// <inheritdoc/>
         public TDbContext GetDbContext<TDbContext>() 
             where TDbContext : DbContext
         {
             return (TDbContext)_dbContext;
         }
 
-        #region Handle the commands of requests
+        /// <inheritdoc/>
+        public void EnsureRecreated()
+        {
+            _dbContext.Database.EnsureDeleted();
+            _dbContext.Database.EnsureCreated();
+        }
 
+        /// <inheritdoc/>
+        public async Task EnsureRecreatedAsync()
+        {
+            await _dbContext.Database.EnsureDeletedAsync();
+            await _dbContext.Database.EnsureCreatedAsync();
+        }
+
+        //#region Handle the commands of requests
+
+        /// <inheritdoc/>
         public async Task CreateAsync<TRequest, TEntity, TReturnedType>(
             TRequest request, TEntity entity)
             where TRequest : RequestToCreate<TEntity, TReturnedType>
@@ -37,7 +64,7 @@ namespace EntityFrameworkCore.XSwift
             if (entity.Uniqueness() != null && entity.Uniqueness()!.Condition != null)
             {
                 await new LogicalState()
-                    .AddAnPreventer( new PreventIfTheEntityWithTheseUniquenessConditionsHasAlreadyBeenExisted<TEntity>(_dbContext, entity.Uniqueness()!.Condition!)
+                    .AddAnPreventer(new PreventIfTheEntityWithTheseUniquenessConditionsHasAlreadyBeenExisted<TEntity>(_dbContext, entity.Uniqueness()!.Condition!)
                     .WithDescription(entity.Uniqueness()!.Description!))
                     .AssesstAsync();
             }
@@ -45,6 +72,7 @@ namespace EntityFrameworkCore.XSwift
             _dbSet.Add(entity);
         }
 
+        /// <inheritdoc/>
         public async Task UpdateAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
             where TRequest : RequestToUpdate<TEntity>
@@ -74,6 +102,7 @@ namespace EntityFrameworkCore.XSwift
             await service.SetCascadeSoftDeleteAsync(entity, callSaveChanges: false);
         }
 
+        /// <inheritdoc/>
         public async Task RestoreAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
             where TRequest : RequestToRestore<TEntity>
@@ -98,6 +127,7 @@ namespace EntityFrameworkCore.XSwift
             await service.ResetCascadeSoftDeleteAsync(entity, callSaveChanges: false);
         }
 
+        /// <inheritdoc/>
         public async Task DeleteAsync<TRequest, TEntity>(
             TRequest request, TEntity entity)
             where TRequest : RequestToDelete<TEntity>
@@ -110,6 +140,7 @@ namespace EntityFrameworkCore.XSwift
             _dbSet.Remove(entity);
         }
 
+        /// <inheritdoc/>
         private async Task<bool> CanDelete<TEntity>(TEntity entity)
             where TEntity : BaseEntity<TEntity>
         {
@@ -117,10 +148,11 @@ namespace EntityFrameworkCore.XSwift
             return (await service.CheckCascadeSoftDeleteAsync(entity)).IsValid;
         }
 
-        #endregion
+        //#endregion
 
-        #region Handle the query based requests
+        //#region Handle the query based requests
 
+        /// <inheritdoc/>
         public async Task<bool> AnyAsync<TRequest, TEntity>(
             TRequest request,
             Func<IQueryable<TEntity>, IQueryable<TEntity>>? filter = null)
@@ -135,6 +167,7 @@ namespace EntityFrameworkCore.XSwift
             return await skippedQuery.AnyAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<TEntity?> GetItemAsync<TRequest, TEntity>(
             TRequest request)
             where TRequest : QueryItemRequest<TEntity, TEntity>
@@ -158,6 +191,7 @@ namespace EntityFrameworkCore.XSwift
             }
         }
 
+        /// <inheritdoc/>
         public async Task<TReturnedType?> GetItemAsync<TRequest, TEntity, TReturnedType>(
             TRequest request,
             Func<IQueryable<TEntity>, IQueryable<TReturnedType>> selector)
@@ -182,6 +216,7 @@ namespace EntityFrameworkCore.XSwift
             }
         }
 
+        /// <inheritdoc/>
         public async Task<TReturnedType?> GetItemAsync<TRequest, TEntity, TReturnedType>(
             TRequest request,
             Converter<TEntity, TReturnedType> converter)
@@ -206,6 +241,7 @@ namespace EntityFrameworkCore.XSwift
             }
         }
 
+        /// <inheritdoc/>
         public async Task<List<TEntity>> GetListAsync<TRequest, TEntity>(
             TRequest request,
             Func<IQueryable<TEntity>, IQueryable<TEntity>>? filter = null)
@@ -224,6 +260,7 @@ namespace EntityFrameworkCore.XSwift
             return await skippedQuery.ToListAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<List<TReturnedType>> GetListAsync<TRequest, TEntity, TReturnedType>(
             TRequest request,
             Converter<TEntity, TReturnedType> converter,
@@ -243,6 +280,7 @@ namespace EntityFrameworkCore.XSwift
             return (await skippedQuery.ToListAsync()).ConvertAll(converter!);
         }
 
+        /// <inheritdoc/>
         public async Task<List<TReturnedType>> GetListAsync<TRequest, TEntity, TReturnedType>(
             TRequest request,
             Func<IQueryable<TEntity>, IQueryable<TReturnedType>> selector,
@@ -262,6 +300,7 @@ namespace EntityFrameworkCore.XSwift
             return await selector(skippedQuery).ToListAsync();
         }
 
+        /// <inheritdoc/>
         public async Task<PaginatedViewModel<TEntity>> GetPaginatedListAsync<
             TRequest, TEntity>(
             TRequest request,
@@ -285,6 +324,7 @@ namespace EntityFrameworkCore.XSwift
                 pageSize: request.PageSize);
         }
 
+        /// <inheritdoc/>
         public async Task<PaginatedViewModel<TReturnedType>> GetPaginatedListAsync<
             TRequest, TEntity, TReturnedType>(
             TRequest request,
@@ -309,6 +349,7 @@ namespace EntityFrameworkCore.XSwift
                   pageSize: request.PageSize);
         }
 
+        /// <inheritdoc/>
         public async Task<PaginatedViewModel<TReturnedType>> GetPaginatedListAsync<
             TRequest, TEntity, TReturnedType>(
             TRequest request,
@@ -333,6 +374,6 @@ namespace EntityFrameworkCore.XSwift
                 pageSize: request.PageSize);
         }
 
-        #endregion
+        //#endregion
     }
 }

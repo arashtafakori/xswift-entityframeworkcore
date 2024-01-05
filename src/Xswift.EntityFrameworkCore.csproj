@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyVersion></AssemblyVersion>
@@ -10,7 +10,7 @@
     <BaseIntermediateOutputPath></BaseIntermediateOutputPath>
     <PackageOutputPath>C:\NuGetPackages\artaware</PackageOutputPath>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.3.1.1</Version>
+    <Version>1.3.1.8</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <Authors>Arash Tafakori</Authors>
@@ -42,16 +42,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="EfCore.SoftDeleteServices" Version="2.0.1" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
-    <PackageReference Include="XSwift" Version="1.3.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\xswift\src\XSwift.csproj" />
+    <PackageReference Include="XSwift" Version="1.3.1.7" />
   </ItemGroup>
 
   <ItemGroup>
