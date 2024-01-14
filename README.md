@@ -8,7 +8,7 @@ This package provides Implementations of the datastore abstractions that belong 
 
 - [Overview](https://xswift.dev/docs/overview)  
 - [Tutorial](https://xswift.dev/docs/tutorial/get-started)  
-- [Example](https://github.com/xswift-project/sample-xswift-task-management)  
+- [Example](https://github.com/xswift-project/example-xswift-task-management/tree/based-on-efcore)  
 - [XSwift Entityframeworkcore reference](https://xswift.dev/docs/category/xswift-entiyframework) 
 
 Other relevant libraries:  
